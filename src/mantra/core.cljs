@@ -35,7 +35,7 @@
     (set! (.-value (.-frequency osc)) (or freq 440))
     (set! (.-value (.-gain gain)) 0)
     (.connect osc gain)
-    (.connect gain (.destination *audio-context*))
+    (.connect gain (.-destination *audio-context*))
     {:osc  osc
      :gain gain}))
 
@@ -46,8 +46,8 @@
   (set! (.-value (.-gain gain)) level))
 
 (defn gain-ramp [gain level]
-  (let [time (.currentTime *audio-context*)]
-    (.linearRampToValueAtTime gain level (+ time 0.1))))
+  (let [time (.-currentTime *audio-context*)]
+    (.linearRampToValueAtTime (.-gain gain) level (+ time 0.1))))
 
 (defn silence [gain]
   (gain gain 0))
@@ -73,7 +73,7 @@
     (gain-ramp gain (or volume (:gain osc-model) 1))
 
     (when duration
-      (js/setTimeout #(silence-ramp osc) duration)
+      (js/setTimeout #(silence-ramp gain) duration)
       (js/setTimeout #(.stop osc) (+ duration 1000)))
 
     (assoc osc-model :osc-node osc :gain-node gain)))
