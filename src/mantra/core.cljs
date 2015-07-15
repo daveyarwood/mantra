@@ -23,7 +23,7 @@
       (throw (js/Error. (str type " is not a valid oscillator type."))))
     (assoc osc-map :type type)))
 
-(defn osc*
+(defn- osc*
   "Creates a one-off oscillator based on a map, hooks it up to a gain node, 
    and hooks the gain node up to the destination of the AudioContext.
 
@@ -36,45 +36,53 @@
     (set! (.-value (.-gain gain)) 0)
     (.connect osc gain)
     (.connect gain (.-destination *audio-context*))
-    {:osc  osc
-     :gain gain}))
+    {:osc-node  osc
+     :gain-node gain}))
 
-(defn freq [osc hz]
-  (set! (.-value (.-frequency osc)) hz))
+(defn- freq [osc-node hz]
+  (set! (.-value (.-frequency osc-node)) hz))
 
-(defn gain [gain level]
-  (set! (.-value (.-gain gain)) level))
+(defn- gain [gain-node level]
+  (set! (.-value (.-gain gain-node)) level))
 
-(defn gain-ramp [gain level]
+(defn- gain-ramp [gain-node level]
   (let [time (.-currentTime *audio-context*)]
-    (.linearRampToValueAtTime (.-gain gain) level (+ time 0.1))))
+    (.linearRampToValueAtTime (.-gain gain-node) level (+ time 0.1))))
 
-(defn silence [gain]
-  (gain gain 0))
+(defn- silence [gain-node]
+  (gain gain-node 0))
 
-(defn silence-ramp [gain]
-  (gain-ramp gain 0))
+(defn- silence-ramp [gain-node]
+  (gain-ramp gain-node 0))
 
+(declare stop-osc)
 (defn play-note 
   "Uses a one-off oscillator to play a note. 
    
-   If duration is present, the oscillator is stopped after duration ms.
-   Otherwise, the note rings out indefinitely. 
-   
-   Returns the input oscillator model, with the new oscillator and gain nodes
-   included so that the oscillator/gain can be stopped or modified later."
+   If duration is present, the oscillator is stopped after duration ms, and the
+   oscillator model is returned unmodified.
+
+   Otherwise, the note rings out indefinitely, and the oscillator model map is
+   returned with two new keys, :osc-node and :gain-node, allowing the osc and
+   gain nodes to be stopped or modified later."
   [osc-model {:keys [pitch duration volume]}]
-  (let [{:keys [osc gain]} (osc* osc-model)]
+  (let [{:keys [osc-node gain-node]} (osc* osc-model)]
     (.start osc 0)
 
     (when pitch 
       (freq osc pitch))
 
-    (gain-ramp gain (or volume (:gain osc-model) 1))
+    (gain-ramp gain-node (or volume (:gain osc-model) 1))
 
-    (when duration
-      (js/setTimeout #(silence-ramp gain) duration)
-      (js/setTimeout #(.stop osc) (+ duration 1000)))
+    (if duration
+      (do
+        (js/setTimeout #(stop-osc osc-impl) duration)
+        osc-model)
+      (merge osc-model osc-impl))))
 
-    (assoc osc-model :osc-node osc :gain-node gain)))
+(defn stop-osc
+  "Silences and stops a currently playing oscillator."
+  [{:keys [osc-node gain-node] :as osc-model-or-impl}]
+  (silence-ramp gain-node)
+  (js/setTimeout #(.stop osc-node) 1000))
 
