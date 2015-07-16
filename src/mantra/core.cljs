@@ -66,11 +66,11 @@
    returned with two new keys, :osc-node and :gain-node, allowing the osc and
    gain nodes to be stopped or modified later."
   [osc-model {:keys [pitch duration volume]}]
-  (let [{:keys [osc-node gain-node]} (osc* osc-model)]
-    (.start osc 0)
+  (let [{:keys [osc-node gain-node] :as osc-impl} (osc* osc-model)]
+    (.start osc-node 0)
 
     (when pitch 
-      (freq osc pitch))
+      (freq osc-node pitch))
 
     (gain-ramp gain-node (or volume (:gain osc-model) 1))
 
@@ -85,4 +85,14 @@
   [{:keys [osc-node gain-node] :as osc-model-or-impl}]
   (silence-ramp gain-node)
   (js/setTimeout #(.stop osc-node) 1000))
+
+(comment "
+  TODO: 
+    - osc-model should have multiple :osc-nodes
+    - play-note should stop any currently playing nodes
+    - (play-notes and play-chord will also do this)
+    - there should also be an also-play-note, which does the same thing as play-note, but doesn't stop any currently playing nodes
+    - ditto for also-play-chord, also-play-notes 
+    - stop-all-oscs (will need to keep track of them in a top-level dynamic var, like *oscillators*)
+")
 
