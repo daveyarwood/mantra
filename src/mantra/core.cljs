@@ -5,6 +5,8 @@
                         js/window.webkitAudioContext)]
     (constructor.)))
 
+(def ^:dynamic *active-oscs* #{})
+
 (defn osc 
   "Models the state of an oscillator.
    
@@ -68,6 +70,7 @@
   [osc-model {:keys [pitch duration volume]}]
   (let [{:keys [osc-node gain-node] :as osc-impl} (osc* osc-model)]
     (.start osc-node 0)
+    (alter-var-root #'*active-oscs* conj osc-node)
 
     (when pitch 
       (freq osc-node pitch))
@@ -76,15 +79,21 @@
 
     (if duration
       (do
+        ; *** see below ***
         (js/setTimeout #(stop-osc osc-impl) duration)
         osc-model)
-      (merge osc-model osc-impl))))
+      (update osc-model :osc-nodes (fnil conj #{}) osc-impl))))
 
+; this fn now only works for osc-impl
+; need a new fn that works for osc-model (which now has a set of osc-impls) 
+; or maybe make this a multimethod that works for both
 (defn stop-osc
   "Silences and stops a currently playing oscillator."
   [{:keys [osc-node gain-node] :as osc-model-or-impl}]
   (silence-ramp gain-node)
-  (js/setTimeout #(.stop osc-node) 1000))
+  (js/setTimeout #(do
+                    (.stop osc-node)
+                    (alter-var-root #'*active-oscs* disj osc-node)) 1000))
 
 (comment "
   TODO: 
@@ -94,5 +103,9 @@
     - there should also be an also-play-note, which does the same thing as play-note, but doesn't stop any currently playing nodes
     - ditto for also-play-chord, also-play-notes 
     - stop-all-oscs (will need to keep track of them in a top-level dynamic var, like *oscillators*)
+    - make time more accurate by not just using setTimeout
+        ref:
+          http://www.html5rocks.com/en/tutorials/audio/scheduling
+          https://github.com/cwilso/metronome/blob/master/js/metronome.js
 ")
 
