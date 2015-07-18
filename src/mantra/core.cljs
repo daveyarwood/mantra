@@ -5,7 +5,7 @@
                         js/window.webkitAudioContext)]
     (constructor.)))
 
-(def ^:dynamic *active-oscs* #{})
+(def *active-oscs* (atom #{}))
 
 (defn osc 
   "Models the state of an oscillator.
@@ -65,12 +65,16 @@
    oscillator model is returned unmodified.
 
    Otherwise, the note rings out indefinitely, and the oscillator model map is
-   returned with two new keys, :osc-node and :gain-node, allowing the osc and
-   gain nodes to be stopped or modified later."
+   updated to include the osc and gain nodes, allowing them to be stopped or
+   modified later."
   [osc-model {:keys [pitch duration volume]}]
+  ; if the osc-model has any currently playing oscillators, stop them 
+  ; (does nothing if there are no currently playing oscillators)
+  (stop-osc osc-model)
+
   (let [{:keys [osc-node gain-node] :as osc-impl} (osc* osc-model)]
     (.start osc-node 0)
-    (alter-var-root #'*active-oscs* conj osc-node)
+    (swap! *active-oscs* conj osc-node)
 
     (when pitch 
       (freq osc-node pitch))
@@ -79,25 +83,30 @@
 
     (if duration
       (do
-        ; *** see below ***
         (js/setTimeout #(stop-osc osc-impl) duration)
         osc-model)
-      (update osc-model :osc-nodes (fnil conj #{}) osc-impl))))
+      (assoc osc-model :osc-nodes #{osc-impl}))))
 
-; this fn now only works for osc-impl
-; need a new fn that works for osc-model (which now has a set of osc-impls) 
-; or maybe make this a multimethod that works for both
 (defn stop-osc
-  "Silences and stops a currently playing oscillator."
-  [{:keys [osc-node gain-node] :as osc-model-or-impl}]
-  (silence-ramp gain-node)
-  (js/setTimeout #(do
-                    (.stop osc-node)
-                    (alter-var-root #'*active-oscs* disj osc-node)) 1000))
+  "Silences and stops a currently playing oscillator.
+   
+   This fn can take either an osc-model or an osc-impl as an argument."
+  [osc]
+  (cond
+    (and (contains? osc :osc-node) (contains? osc :gain-node))
+    (let [{:keys [osc-node gain-node] :as osc-impl} osc]
+      (silence-ramp gain-node)
+      (js/setTimeout #(do
+                        (.stop osc-node)
+                        (swap! *active-oscs* disj osc-node)) 1000))
+    
+    (contains? osc :osc-nodes)
+    (let [{:keys [osc-nodes] :as osc-model} osc]
+      (doseq [osc-node osc-nodes]
+        (stop-osc osc-node)))))
 
 (comment "
   TODO: 
-    - osc-model should have multiple :osc-nodes
     - play-note should stop any currently playing nodes
     - (play-notes and play-chord will also do this)
     - there should also be an also-play-note, which does the same thing as play-note, but doesn't stop any currently playing nodes
