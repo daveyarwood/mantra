@@ -1,11 +1,12 @@
 (set-env! 
   :source-paths #{"src"}
   :dependencies '[[org.clojure/clojurescript "0.0-3308"]
-                  [adzerk/bootlaces "0.1.11" :scope "test"]])
+                  [adzerk/bootlaces "0.1.11" :scope "test"]
+                  [chronoid "0.1.0"]])
 
 (require '[adzerk.bootlaces :refer :all])
 
-(def +version+ "0.2.0")
+(def +version+ "0.2.1")
 (bootlaces! +version+)
 
 (task-options!

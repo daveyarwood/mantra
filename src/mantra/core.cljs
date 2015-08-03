@@ -1,9 +1,13 @@
-(ns mantra.core)
+(ns mantra.core
+  (:require [chronoid.core :as c]))
 
 (def ^:dynamic *audio-context*
   (let [constructor (or js/window.AudioContext
                         js/window.webkitAudioContext)]
     (constructor.)))
+
+(def clock (-> (c/clock :context *audio-context*)
+               (c/start!)))
 
 (defn osc 
   "Models the state of an oscillator.
@@ -100,7 +104,7 @@
     (gain-ramp gain-node (or volume (:gain osc-model) 1))
 
     (when duration
-      (js/setTimeout #(stop-osc osc-impl) duration))))
+      (c/set-timeout! clock #(stop-osc osc-impl) duration))))
 
 (defn start-osc
   "Start an oscillator and add it to *oscillators*."
@@ -118,10 +122,10 @@
     (contains? osc :model-id)
     (let [{:keys [osc-node gain-node]} osc]
       (silence-ramp gain-node)
-      (js/setTimeout #(do
-                        (swap! *oscillators* disj osc)
-                        (.stop osc-node)) 
-                     1000))
+      (c/set-timeout! clock #(do
+                               (swap! *oscillators* disj osc)
+                               (.stop osc-node)) 
+                      1000))
     ; osc-model
     (contains? osc :id)
     (doseq [osc-impl (filter #(= (:id osc) (:model-id %)) @*oscillators*)]
@@ -135,24 +139,6 @@
 
 (comment "
   TODO: 
-    - make time more accurate by not just using setTimeout
-        ref:
-          http://www.html5rocks.com/en/tutorials/audio/scheduling
-          https://github.com/cwilso/metronome/blob/master/js/metronome.js
-
-        - cljs lacks a good 'reliable clock' library -- this would be a good
-          opportunity to create one, and use it for mantra. The article 
-          above explains what appears to be a really good system, based on a 
-          collaboration between the Web Audio clock and the JS clock 
-          (e.g setTimeout). The cool thing is that the Web Audio clock exists
-          whether or not you are using the Web Audio API, so you can easily 
-          use it to schedule arbitrary events, audio-related or not.
-
-          There is already a JS library that does what I'm describing:
-          https://github.com/sebpiq/WAAClock
-
-          Basically we want a cljs port of that.
-        
     - play-notes and play-chord will also stop all notes
     - there should also be an also-play-note, which does the same thing as play-note, but doesn't stop any currently playing nodes
     - ditto for also-play-chord, also-play-notes 
