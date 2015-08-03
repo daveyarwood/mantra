@@ -30,7 +30,7 @@
     (if-not (contains? #{"sine" "square" "sawtooth" "triangle"} type)
       (throw (js/Error. (str type " is not a valid oscillator type.")))
       (assoc osc-map :type type
-                     :id   (str (gensym type))))))
+                     :id   (gensym type)))))
 
 (defn- osc*
   "Creates a one-off oscillator based on a map, hooks it up to a gain node, 

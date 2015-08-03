@@ -1,5 +1,7 @@
 > Don't have negative thoughts. Remember your mantra.
 >
+> gsb?8A?,INwbg3AU4IUx0PhA
+> 
 > \- Faxanadu
 
 # mantra
