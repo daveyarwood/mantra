@@ -140,7 +140,16 @@
    If pitch is omitted (or nil), the note is treated as a rest (a pause in the
    sequence, the length of `duration`."
   [osc-model notes]
-  "TODO")
+
+  ; stop any currently playing oscillators for this osc-model 
+  (stop-osc osc-model) 
+  
+  (reduce (fn [timeout {:keys [pitch duration volume] :as note-model}]
+            (when pitch
+              (c/set-timeout! clock #(play-note osc-model note-model) timeout))
+            (+ timeout duration))
+          0
+          notes))
 
 (comment "
   TODO: 
