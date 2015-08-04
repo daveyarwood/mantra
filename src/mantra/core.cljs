@@ -83,29 +83,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(declare start-osc stop-osc)
-
-(defn play-note 
-  "Uses a one-off oscillator to play a note. 
-   
-   If duration is present, the oscillator is stopped after `duration` ms.
-
-   Otherwise, the note rings out indefinitely, until the oscillator is stopped."
-  [osc-model {:keys [pitch duration volume] :as note-model}]
-
-  ; stop any currently playing oscillators for this osc-model 
-  (stop-osc osc-model) 
-
-  (let [{:keys [osc-node gain-node] :as osc-impl} (osc* osc-model)]
-    (start-osc osc-impl)
-
-    (freq osc-node (or pitch (:freq osc-model)))
-
-    (gain-ramp gain-node (or volume (:gain osc-model) 1))
-
-    (when duration
-      (c/set-timeout! clock #(stop-osc osc-impl) duration))))
-
 (defn start-osc
   "Start an oscillator and add it to *oscillators*."
   [{:keys [osc-node] :as osc-impl}]
@@ -137,6 +114,34 @@
   (doseq [osc @*oscillators*]
     (stop-osc osc)))
 
+(defn play-note 
+  "Uses a one-off oscillator to play a note. 
+   
+   If duration is present, the oscillator is stopped after `duration` ms.
+
+   Otherwise, the note rings out indefinitely, until the oscillator is stopped."
+  [osc-model {:keys [pitch duration volume] :as note-model}]
+
+  ; stop any currently playing oscillators for this osc-model 
+  (stop-osc osc-model) 
+
+  (let [{:keys [osc-node gain-node] :as osc-impl} (osc* osc-model)]
+    (freq osc-node (or pitch (:freq osc-model)))
+    (gain-ramp gain-node (or volume (:gain osc-model) 1))
+
+    (start-osc osc-impl)
+
+    (when duration
+      (c/set-timeout! clock #(stop-osc osc-impl) duration))))
+
+(defn play-notes
+  "Plays a sequence of notes, one after the other.
+
+   If pitch is omitted (or nil), the note is treated as a rest (a pause in the
+   sequence, the length of `duration`."
+  [osc-model notes]
+  "TODO")
+
 (comment "
   TODO: 
     - play-notes and play-chord will also stop all notes
@@ -144,5 +149,7 @@
     - ditto for also-play-chord, also-play-notes 
     - 'mute' functionality, stops oscs but also keeps track of their state so
       they can be restarted when 'unmuted'
+    - a generic `play` function that will do the right thing, depending on the types of the arguments
+        e.g. multiple arguments are treated as a sequence of notes, a collection of notes is treated as a chord
 ")
 
