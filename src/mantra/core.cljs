@@ -114,17 +114,8 @@
   (doseq [osc @*oscillators*]
     (stop-osc osc)))
 
-(defn play-note 
-  "Uses a one-off oscillator to play a note. 
-   
-   If duration is present, the oscillator is stopped after `duration` ms.
-
-   Otherwise, the note rings out indefinitely, until the oscillator is stopped."
+(defn- play-note*
   [osc-model {:keys [pitch duration volume] :as note-model}]
-
-  ; stop any currently playing oscillators for this osc-model 
-  (stop-osc osc-model) 
-
   (let [{:keys [osc-node gain-node] :as osc-impl} (osc* osc-model)]
     (freq osc-node (or pitch (:freq osc-model)))
     (gain-ramp gain-node (or volume (:gain osc-model) 1))
@@ -134,28 +125,77 @@
     (when duration
       (c/set-timeout! clock #(stop-osc osc-impl) duration))))
 
-(defn play-notes
-  "Plays a sequence of notes, one after the other.
+(defn play-note 
+  "Uses a one-off oscillator to play a note.
 
-   If pitch is omitted (or nil), the note is treated as a rest (a pause in the
-   sequence, the length of `duration`."
-  [osc-model notes]
+   Stops any currently playing oscillators belonging to `osc-model`.
+   
+   If duration is present, the oscillator is stopped after `duration` ms.
 
-  ; stop any currently playing oscillators for this osc-model 
+   Otherwise, the note rings out indefinitely, until the oscillator is stopped."
+  [osc-model note-model]
   (stop-osc osc-model) 
-  
+  (play-note* osc-model note-model))
+
+(defn also-play-note
+  "Like `play-note`, but does not stop any currently playing oscillators."
+  [osc-model note-model]
+  (play-note* osc-model note-model))
+
+(defn- play-notes*
+  [osc-model notes play-fn]
   (reduce (fn [timeout {:keys [pitch duration volume] :as note-model}]
             (when pitch
-              (c/set-timeout! clock #(play-note osc-model note-model) timeout))
+              (c/set-timeout! clock #(play-fn osc-model note-model) timeout))
             (+ timeout duration))
           0
           notes))
 
+(defn play-notes
+  "Plays a sequence of notes, one after the other.
+
+   Stops any currently playing oscillators belonging to `osc-model`.
+
+   If pitch is omitted (or nil), the note is treated as a rest (a pause in the
+   sequence, the length of `duration`."
+  [osc-model notes]
+  ; stop any currently playing oscillators for this osc-model 
+  ; (even if the first "note" is a rest)
+  (stop-osc osc-model) 
+  (play-notes* osc-model notes play-note))
+
+(defn also-play-notes
+  "Like `play-notes`, but does not stop any currently playing oscillators.
+   
+   Each note in `notes` does behave normally when played, i.e. if it has a 
+   duration, it *will* stop after `duration` ms."
+  [osc-model notes]
+  (play-notes* osc-model notes also-play-note))
+
+(defn- play-chord*
+  [osc-model notes play-fn]
+  (doseq [{:keys [pitch] :as note} notes] 
+    (when pitch
+      (play-fn osc-model note))))
+
+(defn play-chord
+  "Plays a collection of notes simultaneously.
+   
+   Stops any currently playing oscillators belonging to `osc-model`."
+  [osc-model notes]
+  (stop-osc osc-model)
+  (play-chord* osc-model notes also-play-note))
+
+(defn also-play-chord
+  "Like `play-chord`, but does not stop any currently playing oscillators.
+   
+   Each note in `notes` does behave normally when played, i.e. if it has a 
+   duration, it *will* stop after `duration` ms."
+  [osc-model notes]
+  (play-chord* osc-model notes also-play-note))
+
 (comment "
   TODO: 
-    - play-notes and play-chord will also stop all notes
-    - there should also be an also-play-note, which does the same thing as play-note, but doesn't stop any currently playing nodes
-    - ditto for also-play-chord, also-play-notes 
     - 'mute' functionality, stops oscs but also keeps track of their state so
       they can be restarted when 'unmuted'
     - a generic `play` function that will do the right thing, depending on the types of the arguments
