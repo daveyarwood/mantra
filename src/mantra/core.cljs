@@ -147,7 +147,7 @@
   (reduce (fn [timeout {:keys [pitch duration volume] :as note-model}]
             (when pitch
               (c/set-timeout! clock #(play-fn osc-model note-model) timeout))
-            (+ timeout duration))
+            (+ timeout (or duration 0)))
           0
           notes))
 
