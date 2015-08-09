@@ -1,13 +1,17 @@
 (ns mantra.core
   (:require [chronoid.core :as c]))
 
-(def ^:dynamic *audio-context*
+(def ^:dynamic *audio-context* (atom nil))
+(def ^:dynamic *clock* (atom nil))
+
+(defn create-audio-context [] 
   (let [constructor (or js/window.AudioContext
                         js/window.webkitAudioContext)]
-    (constructor.)))
+    (reset! *audio-context* (constructor.))))
 
-(def clock (-> (c/clock :context *audio-context*)
-               (c/start!)))
+(defn create-clock [context]
+  (reset! *clock* (-> (c/clock :context context)
+                      (c/start!))))
 
 (defn osc 
   "Models the state of an oscillator.
@@ -28,13 +32,22 @@
 
    :freq and :gain are optional default values that, when present, are used
    when playing notes that do not specify frequency/gain values. If left out,
-   they default to 440 Hz and 1.0 (full volume), respectively."
-  [& {:keys [type freq gain] :as osc-map}]
-  (let [type (name (or type :sine))]
+   they default to 440 Hz and 1.0 (full volume), respectively.
+   
+   You can also supply your own AudioContext as :context, otherwise Mantra will
+   create and use its own AudioContext.
+   
+   Similarly, you can supply your own chronoid clock as :clock, otherwise 
+   Mantra will create one for you."
+  [& {:keys [type freq gain context clock] :as osc-map}]
+  (let [type    (name (or type :sine))
+        context (or context @*audio-context* (create-audio-context))]
     (if-not (contains? #{"sine" "square" "sawtooth" "triangle"} type)
       (throw (js/Error. (str type " is not a valid oscillator type.")))
-      (assoc osc-map :type type
-                     :id   (gensym type)))))
+      (assoc osc-map :type    type
+                     :id      (gensym type)
+                     :context context
+                     :clock   (or clock @*clock* (create-clock context))))))
 
 (defn- osc*
   "Creates a one-off oscillator based on a map, hooks it up to a gain node, 
@@ -42,17 +55,19 @@
 
    Returns a map including the oscillator and gain nodes and the ID of the
    oscillator model used as a blueprint."
-  [{:keys [id type freq]}]
-  (let [osc  (.createOscillator *audio-context*)
-        gain (.createGain *audio-context*)]
+  [{:keys [id type freq context clock]}]
+  (let [osc  (.createOscillator context)
+        gain (.createGain context)]
     (set! (.-type osc) (or type "sine"))
     (set! (.-value (.-frequency osc)) (or freq 440))
     (set! (.-value (.-gain gain)) 0)
     (.connect osc gain)
-    (.connect gain (.-destination *audio-context*))
+    (.connect gain (.-destination context))
     {:osc-node  osc
      :gain-node gain
-     :model-id  id}))
+     :model-id  id
+     :context   context
+     :clock     clock}))
 
 (def ^{:doc "A set of currently active oscillators. Each oscillator is 
              represented as a map containing:
@@ -72,7 +87,7 @@
   (set! (.-value (.-gain gain-node)) level))
 
 (defn- gain-ramp [gain-node level]
-  (let [time (.-currentTime *audio-context*)]
+  (let [time (.-currentTime (.-context gain-node))]
     (.linearRampToValueAtTime (.-gain gain-node) level (+ time 0.1))))
 
 (defn- silence [gain-node]
@@ -97,7 +112,7 @@
   (cond
     ; osc-impl
     (contains? osc :model-id)
-    (let [{:keys [osc-node gain-node]} osc]
+    (let [{:keys [osc-node gain-node clock]} osc]
       (silence-ramp gain-node)
       (c/set-timeout! clock #(do
                                (swap! *oscillators* disj osc)
@@ -116,7 +131,7 @@
 
 (defn- play-note*
   [osc-model {:keys [pitch duration volume] :as note-model}]
-  (let [{:keys [osc-node gain-node] :as osc-impl} (osc* osc-model)]
+  (let [{:keys [osc-node gain-node clock] :as osc-impl} (osc* osc-model)]
     (freq osc-node (or pitch (:freq osc-model)))
     (gain-ramp gain-node (or volume (:gain osc-model) 1))
 
@@ -143,7 +158,7 @@
   (play-note* osc-model note-model))
 
 (defn- play-notes*
-  [osc-model notes play-fn]
+  [{:keys [clock] :as osc-model} notes play-fn]
   (reduce (fn [timeout {:keys [pitch duration volume] :as note-model}]
             (when pitch
               (c/set-timeout! clock #(play-fn osc-model note-model) timeout))
@@ -201,6 +216,5 @@
     - a generic `play` function that will do the right thing, depending on the types of the arguments
         e.g. multiple arguments are treated as a sequence of notes, a collection of notes is treated as a chord
     - higher-level abstractions for pitch and duration, i.e. a G#5 half note at 100 bpm
-    - allow a :context key to `osc` for overriding *audio-context*?
 ")
 
