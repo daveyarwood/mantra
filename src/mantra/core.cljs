@@ -129,6 +129,35 @@
   (doseq [osc @*oscillators*]
     (stop-osc osc)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def ^:dynamic *tempo* (atom 60))
+
+(defn set-tempo [bpm]
+  (reset! *tempo* bpm))
+
+(defn update-tempo [f & args]
+  (apply swap! *tempo* f args))
+
+(def note-lengths
+  ; TODO: 
+  ; - dotted notes
+  ; - British note names (crotchet, quaver, etc.) 
+  ; - a way to tie notes together (maybe a vector of note lengths)
+  {:sixty-fourth  64
+   :thirty-second 32
+   :sixteenth     16
+   :eighth        8
+   :quarter       4
+   :half          2
+   :whole         1})
+
+(defn parse-duration [duration]
+  (cond
+    (number? duration)     duration
+    (keyword? duration)    "TODO"
+    (sequential? duration) (apply + (map parse-duration duration))))
+
 (defn- play-note*
   [osc-model {:keys [pitch duration volume] :as note-model}]
   (let [{:keys [osc-node gain-node clock] :as osc-impl} (osc* osc-model)]
@@ -138,7 +167,8 @@
     (start-osc osc-impl)
 
     (when duration
-      (c/set-timeout! clock #(stop-osc osc-impl) duration))))
+      (let [duration-ms (parse-duration duration)]
+        (c/set-timeout! clock #(stop-osc osc-impl) duration)))))
 
 (defn play-note 
   "Uses a one-off oscillator to play a note.
