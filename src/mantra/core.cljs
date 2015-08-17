@@ -88,13 +88,13 @@
 
 (defn- gain-ramp [gain-node level]
   (let [time (.-currentTime (.-context gain-node))]
-    (.linearRampToValueAtTime (.-gain gain-node) level (+ time 0.1))))
+    (.exponentialRampToValueAtTime (.-gain gain-node) level (+ time 0.1))))
 
 (defn- silence [gain-node]
   (gain gain-node 0))
 
 (defn- silence-ramp [gain-node]
-  (gain-ramp gain-node 0))
+  (gain-ramp gain-node 0.0001))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -152,10 +152,18 @@
    :half          2
    :whole         1})
 
+(defn note-length->duration [nl]
+  (let [beats (/ 4 nl)
+        beat-duration (* 1000 (/ 60 @*tempo*))] 
+    (* beats beat-duration)))
+
 (defn parse-duration [duration]
   (cond
     (number? duration)     duration
-    (keyword? duration)    "TODO"
+    (keyword? duration)    (do
+                             (assert (contains? note-lengths duration)
+                                     (str duration " is not a valid note length."))
+                             (note-length->duration (note-lengths duration)))
     (sequential? duration) (apply + (map parse-duration duration))))
 
 (defn- play-note*
@@ -168,7 +176,7 @@
 
     (when duration
       (let [duration-ms (parse-duration duration)]
-        (c/set-timeout! clock #(stop-osc osc-impl) duration)))))
+        (c/set-timeout! clock #(stop-osc osc-impl) duration-ms)))))
 
 (defn play-note 
   "Uses a one-off oscillator to play a note.
@@ -192,7 +200,8 @@
   (reduce (fn [timeout {:keys [pitch duration volume] :as note-model}]
             (when pitch
               (c/set-timeout! clock #(play-fn osc-model note-model) timeout))
-            (+ timeout (or duration 0)))
+            (let [duration-ms (parse-duration (or duration 0))] 
+              (+ timeout duration-ms)))
           0
           notes))
 
