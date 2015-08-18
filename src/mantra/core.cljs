@@ -133,24 +133,61 @@
 
 (def ^:dynamic *tempo* (atom 60))
 
+(defn get-tempo [] @*tempo*)
+
 (defn set-tempo [bpm]
   (reset! *tempo* bpm))
 
 (defn update-tempo [f & args]
   (apply swap! *tempo* f args))
 
+(defn dotted 
+  "Returns the theoretical new note length when a note-length is given the 
+   specified number of dots. 
+
+   e.g. given that quarter = 4, dotted quarter = 2-2/3"
+  [note-length dots]
+  (let [beats (/ 4 note-length)]
+    (loop [total-beats beats, factor 0.5, dots dots]
+      (if (pos? dots)
+        (recur (+ total-beats (* beats factor)) (* factor 0.5) (dec dots))
+        (/ 4 total-beats)))))
+
+(def base-note-lengths
+  (merge
+    ; american names
+    {:double-whole          0.5
+     :whole                 1
+     :half                  2
+     :quarter               4
+     :eighth                8
+     :sixteenth             16
+     :thirty-second         32
+     :sixty-fourth          64
+     :hundred-twenty-eighth 128}
+    ; british names
+    {:breve                  0.5
+     :semibreve              1
+     :minim                  2
+     :crotchet               4
+     :quaver                 8
+     :semiquaver             16
+     :demisemiquaver         32
+     :hemidemisemiquaver     64
+     :semihemidemisemiquaver 128 }))
+
 (def note-lengths
-  ; TODO: 
-  ; - dotted notes
-  ; - British note names (crotchet, quaver, etc.) 
-  ; - a way to tie notes together (maybe a vector of note lengths)
-  {:sixty-fourth  64
-   :thirty-second 32
-   :sixteenth     16
-   :eighth        8
-   :quarter       4
-   :half          2
-   :whole         1})
+  (merge 
+    base-note-lengths
+    (into {} 
+      (for [[k v] base-note-lengths]
+        [(keyword (str "dotted-" (name k))) (dotted v 1)]))
+    (into {} 
+      (for [[k v] base-note-lengths]
+        [(keyword (str "double-dotted-" (name k))) (dotted v 2)]))
+    (into {} 
+      (for [[k v] base-note-lengths]
+        [(keyword (str "triple-dotted-" (name k))) (dotted v 3)]))))
 
 (defn note-length->duration [nl]
   (let [beats (/ 4 nl)

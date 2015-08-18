@@ -38,9 +38,75 @@ Mantra also provides an abstraction for musical notes. A note is represented as 
 
 * `:pitch` -- the frequency of the note, in Hz
 
-* `:duration` (optional) -- the duration of the note, in milliseconds. When omitted, the note will sustain until it is stopped explicitly.
+* `:duration` (optional) -- the duration of the note. When omitted, the note will sustain until it is stopped explicitly.
 
 Mantra uses [chronoid](http://github.com/daveyarwood/chronoid) for accurate timing of notes, leveraging the accuracy of the Web Audio API's clock, which runs on a separate thread.
+
+#### Pitch
+
+For now, pitch must be a frequency in Hz.
+
+#### Duration
+
+The duration of a note can be specified in a number of different ways.
+
+The simplest way is as a number of milliseconds:
+
+```clojure
+{:pitch 440 :duration 1000}
+```
+
+Mantra also supports note length abstractions from Western [musical notation](https://en.wikipedia.org/wiki/List_of_musical_symbols#Notes_and_rests). These represent a number of *beats*, expressed as a percentage of the *whole note*, which lasts for 4 beats (one measure in [4/4 time](https://en.wikipedia.org/wiki/Time_signature)). Some of the American note names are:
+
+  - whole (4 beats)
+  - half (2 beats, or 1/2 of a whole note)
+  - quarter (1 beat, or 1/4 of a whole note)
+  - eighth (1/2 beat, or 1/8 of a whole note)
+  - sixteenth (1/4 beat, or 1/16 of a whole note)
+
+You can use these terms, in keyword form, to specify the duration of a note:
+
+```clojure
+{:pitch 100 :duration :quarter}
+{:pitch 200 :duration :half}
+{:pitch 300 :duration :whole}
+{:pitch 400 :duration :hundred-twenty-eighth}
+```
+
+British terminology is also supported:
+
+```clojure
+{:pitch 100 :duration :crotchet}
+{:pitch 200 :duration :minim}
+{:pitch 300 :duration :semibreve}
+{:pitch 400 :duration :semihemidemisemiquaver}
+```
+
+Mantra also supports [dotted notes](https://en.wikipedia.org/wiki/Dotted_note):
+
+```clojure
+{:pitch 100 :duration :dotted-half}
+{:pitch 200 :duration :double-dotted-minim}
+{:pitch 300 :duration :triple-dotted-semiquaver}
+```
+
+##### Tempo
+
+When using standard notation, the duration of each note in milliseconds is derived based on the current tempo, which is described in terms of beats per minute (bpm).
+
+The default tempo is 60 bpm.
+
+Mantra provides get, set and update methods to allow you to interact with the current tempo.
+
+```clojure
+(m/get-tempo) ;=> 60
+
+(m/set-tempo 120) ;=> 120
+
+(m/update-tempo inc) ;=> 121
+
+(m/update-tempo * 2) ;=> 242
+```
 
 ### Playing notes
 
