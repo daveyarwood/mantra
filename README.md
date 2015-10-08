@@ -90,6 +90,16 @@ Mantra also supports [dotted notes](https://en.wikipedia.org/wiki/Dotted_note):
 {:pitch 300 :duration :triple-dotted-semiquaver}
 ```
 
+There is also basic support for [tuplets](https://en.wikipedia.org/wiki/Tuplet) -- you can add `-triplet`, `-quintuplet`, or `-septuplet` after a basic note length to get a duration equal to the next longest note-length divided by 3, 5 or 7. For example a quarter note triplet is equal to 1/3 the length of a half note.
+
+```clojure
+{:pitch 100 :duration :quarter-triplet}
+{:pitch 400 :duration :hundred-twenty-eighth-septuplet}
+{:pitch 100 :duration :crotchet-quintuplet}
+```
+
+> Note: Combining the `dotted-` prefix and `-triplet/-quintuplet/-septuplet` suffixes is not supported, though it would be easy to add in. If you have a need for this, let me know!
+
 ##### Tempo
 
 When using standard notation, the duration of each note in milliseconds is derived based on the current tempo, which is described in terms of beats per minute (bpm).

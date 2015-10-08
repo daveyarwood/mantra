@@ -153,6 +153,14 @@
         (recur (+ total-beats (* beats factor)) (* factor 0.5) (dec dots))
         (/ 4 total-beats)))))
 
+(defn tuplet
+  "Returns the theoretical new note longeth when a note-length is made into a
+   tuplet of n (i.e. for note-length 4, n 3, a quarter note triplet).
+   
+   e.g. quarter = 4, quarter note triplet = 6"
+  [note-length n]
+  (* n (/ note-length 2)))
+
 (def base-note-lengths
   (merge
     ; american names
@@ -187,7 +195,16 @@
         [(keyword (str "double-dotted-" (name k))) (dotted v 2)]))
     (into {} 
       (for [[k v] base-note-lengths]
-        [(keyword (str "triple-dotted-" (name k))) (dotted v 3)]))))
+        [(keyword (str "triple-dotted-" (name k))) (dotted v 3)]))
+    (into {}
+      (for [[k v] base-note-lengths]
+        [(keyword (str (name k) "-triplet")) (tuplet v 3)]))
+    (into {}
+      (for [[k v] base-note-lengths]
+        [(keyword (str (name k) "-quintuplet")) (tuplet v 5)]))
+    (into {}
+      (for [[k v] base-note-lengths]
+        [(keyword (str (name k) "-septuplet")) (tuplet v 7)]))))
 
 (defn note-length->duration [nl]
   (let [beats (/ 4 nl)
