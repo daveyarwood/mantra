@@ -302,24 +302,3 @@
   [osc-model notes]
   (play-chord* osc-model notes also-play-note))
 
-(comment "
-  TODO: 
-    - 'mute' functionality, stops oscs but also keeps track of their state so
-      they can be restarted when 'unmuted'
-    - a generic `play` function that will do the right thing, depending on the 
-      types of the arguments
-      e.g. multiple arguments are treated as a sequence of notes, a collection 
-      of notes is treated as a chord
-    - higher-level abstractions for pitch and duration, i.e. a G#5 half note at
-      100 bpm
-    - 'pause' functionality -- can add a `pause!` function to chronoid which
-      will take a snapshot of the events currently scheduled (noting their
-      deadlines relative to the current time) and unschedule them, and 
-      `unpause!` and/or `toggle-pause!` to re-schedule the saved events 
-      relative to the new current time. 
-
-      For mantra, should use a combination of chronoid `pause!` and muting any
-      currently active oscillators. When pause is toggled off, the oscillators
-      should be unmuted and the clock un-paused.
-")
-
