@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.5.1 (10/14/15)
+
+* Allow note lengths to be provided in string form.
+
 ## 0.5.0 (10/8/15)
 
 * Added `-triplet`, `-quintuplet`, and `-septuplet` suffixes to available note lengths.
