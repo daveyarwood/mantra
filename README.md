@@ -140,6 +140,8 @@ One thing to note about this function is that any notes that the oscillator migh
 
 This will also sound the oscillator for 1 second, but it does so in a way that demonstrates another possible way to use `play-note`: if you give it a note model that does not include a duration, the note will sound indefinitely until you stop it. As you can see, you can stop the note with `stop-osc`, a function that stops any notes that an oscillator model might be playing at a given moment.
 
+> There is also `stop-all-oscs`, which will stop any currently-playing oscillators that were created via Mantra.
+
 #### `also-play-note`
 
 ```clojure
