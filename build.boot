@@ -1,4 +1,4 @@
-(set-env! 
+(set-env!
   :source-paths #{"src"}
   :dependencies '[[org.clojure/clojurescript "0.0-3308"]
                   [adzerk/bootlaces "0.1.11" :scope "test"]
