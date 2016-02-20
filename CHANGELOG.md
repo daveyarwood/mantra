@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.5.4 (2/20/16)
+
+* Fixed a bug in [chronoid](http://github.com/daveyarwood/chronoid) that was affecting mantra to some extent. mantra now uses chronoid 0.1.1, which contains the fix.
+
 ## 0.5.3 (2/20/16)
 
 * Fixed a Firefox-specific bug caused by setting the gain value of a gain node to 0 and then trying to use [`exponentialRampToValueAtTime`](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/exponentialRampToValueAtTime). Per Mozilla's documentation:
