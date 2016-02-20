@@ -4,7 +4,7 @@
 
 * Fixed a Firefox-specific bug caused by setting the gain value of a gain node to 0 and then trying to use [`exponentialRampToValueAtTime`](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/exponentialRampToValueAtTime). Per Mozilla's documentation:
 
-  > Added in a safeguard against setting the tempo to `nil`. Previously this was happening if you called `(set-tempo)` without a `bpm` argument. Now this will throw an error instead.
+  > A value of 0.01 was used for the value to ramp down to in the last function rather than 0, as an invalid or illegal string error is thrown if 0 is used -- the value needs to be positive.
 
   [It turns out](http://stackoverflow.com/questions/29819382/how-does-the-audioparam-exponentialramptovalueattime-work) that this applies not only to the value you're ramping to, but also the value you're ramping *from*.
 
