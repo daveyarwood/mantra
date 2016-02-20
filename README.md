@@ -1,7 +1,7 @@
 > Don't have negative thoughts. Remember your mantra.
 >
 > gsb?8A?,INwbg3AU4IUx0PhA
-> 
+>
 > \- Faxanadu
 
 # mantra
@@ -165,7 +165,7 @@ This will also sound the oscillator for 1 second, but it does so in a way that d
 
 `play-notes` plays a sequence of notes, one after the other. Each note starts when the note before it ends.
 
-Like `play-note`, any notes that the oscillator model may have already been playing when this function is called, will be stopped. 
+Like `play-note`, any notes that the oscillator model may have already been playing when this function is called, will be stopped.
 
 ```clojure
 (m/play-notes sq [{:pitch 220 :duration 250}
@@ -186,9 +186,9 @@ If you omit the `:duration` key from any of the notes, the note will sustain ind
 #### `play-chord`
 
 ```clojure
-(m/play-chord [{:pitch 220 :duration 2000}
-               {:pitch 330 :duration 2000}
-               {:pitch 440 :duration 2000}])
+(m/play-chord sq [{:pitch 220 :duration 2000}
+                  {:pitch 330 :duration 2000}
+                  {:pitch 440 :duration 2000}])
 ```
 
 `play-chord` plays a collection of notes simultaneously.
@@ -201,7 +201,7 @@ You can probably guess what this function does.
 
 ## License
 
-Copyright © 2015 Dave Yarwood
+Copyright © 2015-2016 Dave Yarwood
 
 Distributed under the Eclipse Public License version 1.0.
 
