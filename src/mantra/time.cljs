@@ -12,7 +12,9 @@
 (defn get-tempo [] @*tempo*)
 
 (defn set-tempo [bpm]
-  (reset! *tempo* bpm))
+  (if bpm
+    (reset! *tempo* bpm)
+    (throw (js/Error. "You must supply a tempo. e.g.: (set-tempo 120)"))))
 
 (defn update-tempo [f & args]
   (apply swap! *tempo* f args))
