@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.5.3 (2/20/16)
+
+* Fixed a Firefox-specific bug caused by setting the gain value of a gain node to 0 and then trying to use [`exponentialRampToValueAtTime`](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/exponentialRampToValueAtTime). Per Mozilla's documentation:
+
+  > Added in a safeguard against setting the tempo to `nil`. Previously this was happening if you called `(set-tempo)` without a `bpm` argument. Now this will throw an error instead.
+
+  [It turns out](http://stackoverflow.com/questions/29819382/how-does-the-audioparam-exponentialramptovalueattime-work) that this applies not only to the value you're ramping to, but also the value you're ramping *from*.
+
+  We were initializing oscillators with a gain node gain value of 0, which led to this bug when trying to use the oscillator to play notes.
+
+  This should now work properly in Firefox. I also verified that it works in Safari. It was already working in Chrome.
+
 ## 0.5.2 (2/20/16)
 
 * Added in a safeguard against setting the tempo to `nil`. Previously this was happening if you called `(set-tempo)` without a `bpm` argument. Now this will throw an error instead.

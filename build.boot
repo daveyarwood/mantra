@@ -3,19 +3,19 @@
   :resource-paths #{"test-page"}
   :dependencies   '[[org.clojure/clojure       "1.7.0"]
                     [org.clojure/clojurescript "1.7.228"]
-                    [adzerk/bootlaces          "0.1.11" :scope "test"]
-                    [adzerk/boot-cljs          "1.7.228-1"]
-                    [adzerk/boot-cljs-repl     "0.3.0"  :scope "test"]
-                    [com.cemerick/piggieback   "0.2.1"  :scope "test"]
-                    [weasel                    "0.7.0"  :scope "test"]
-                    [org.clojure/tools.nrepl   "0.2.12" :scope "test"]
+                    [adzerk/bootlaces          "0.1.11"    :scope "test"]
+                    [adzerk/boot-cljs          "1.7.228-1" :scope "test"]
+                    [adzerk/boot-cljs-repl     "0.3.0"     :scope "test"]
+                    [com.cemerick/piggieback   "0.2.1"     :scope "test"]
+                    [weasel                    "0.7.0"     :scope "test"]
+                    [org.clojure/tools.nrepl   "0.2.12"    :scope "test"]
                     [chronoid "0.1.0"]])
 
 (require '[adzerk.bootlaces      :refer :all]
          '[adzerk.boot-cljs      :refer (cljs)]
          '[adzerk.boot-cljs-repl :refer (cljs-repl start-repl)])
 
-(def +version+ "0.5.2")
+(def +version+ "0.5.3")
 (bootlaces! +version+)
 
 (task-options!

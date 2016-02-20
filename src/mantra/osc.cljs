@@ -50,7 +50,7 @@
         gain (.createGain context)]
     (set! (.-type osc) (or type "sine"))
     (set! (.-value (.-frequency osc)) (or freq 440))
-    (set! (.-value (.-gain gain)) 0)
+    (set! (.-value (.-gain gain)) 0.001)
     (.connect osc gain)
     (.connect gain (.-destination context))
     {:osc-node  osc
@@ -81,10 +81,10 @@
     (.exponentialRampToValueAtTime (.-gain gain-node) level (+ time 0.1))))
 
 (defn silence [gain-node]
-  (gain gain-node 0))
+  (gain gain-node 0.001))
 
 (defn silence-ramp [gain-node]
-  (gain-ramp gain-node 0.0001))
+  (gain-ramp gain-node 0.001))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
