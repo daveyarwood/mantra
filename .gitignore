@@ -1,4 +1,5 @@
 target/
+out/
 .lein*
 .nrepl*
 .DS_Store
