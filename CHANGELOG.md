@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.5.2 (2/20/16)
+
+* Added in a safeguard against setting the tempo to `nil`. Previously this was happening if you called `(set-tempo)` without a `bpm` argument. Now this will throw an error instead.
+
 ## 0.5.1 (10/14/15)
 
 * Allow note lengths to be provided in string form.
