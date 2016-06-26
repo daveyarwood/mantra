@@ -9,13 +9,14 @@
                     [com.cemerick/piggieback   "0.2.1"     :scope "test"]
                     [weasel                    "0.7.0"     :scope "test"]
                     [org.clojure/tools.nrepl   "0.2.12"    :scope "test"]
-                    [chronoid "0.1.1"]])
+                    [chronoid                  "0.1.1"]
+                    [music-theory              "0.1.0"]])
 
 (require '[adzerk.bootlaces      :refer :all]
          '[adzerk.boot-cljs      :refer (cljs)]
          '[adzerk.boot-cljs-repl :refer (cljs-repl start-repl)])
 
-(def +version+ "0.5.4")
+(def +version+ "0.6.0")
 (bootlaces! +version+)
 
 (task-options!
@@ -29,7 +30,7 @@
 
 (deftask dev []
   (comp (watch)
-        (speak)
+        #_(speak)
         (cljs-repl)
         (cljs)
         (target)))

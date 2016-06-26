@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.6.0 (6/26/16)
+
+* Added the ability to express the pitch of a note as a string or keyword containing the note (letter) name and octave.
+
+  Example usage:
+
+  ```clojure
+  (require '[mantra.core :as m])
+
+  (def o (m/osc :triangle))
+
+  (m/play-notes o [{:pitch "C#5" :duration :quarter}
+                   {:pitch :Ab3  :duration :dotted-half}])
+  ```
+
 ## 0.5.4 (2/20/16)
 
 * Fixed a bug in [chronoid](http://github.com/daveyarwood/chronoid) that was affecting mantra to some extent. mantra now uses chronoid 0.1.1, which contains the fix.

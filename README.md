@@ -38,7 +38,7 @@ One important difference between Mantra's oscillator models and the Web Audio AP
 
 Mantra also provides an abstraction for musical notes. A note is represented as a map containing the following keys:
 
-* `:pitch` -- the frequency of the note, in Hz
+* `:pitch` -- the frequency of the note, either an exact number in Hz or a reference to a frequency in the form of a particular note in a particular octave
 
 * `:duration` (optional) -- the duration of the note. When omitted, the note will sustain until it is stopped explicitly.
 
@@ -46,7 +46,22 @@ Mantra uses [chronoid](http://github.com/daveyarwood/chronoid) for accurate timi
 
 #### Pitch
 
-For now, pitch must be a frequency in Hz.
+The pitch of a note can be expressed in a couple of different ways:
+
+1. As a number representing the frequency in Hz:
+
+  ```clojure
+  {:pitch 440 :duration 1000}
+  ```
+
+1. As a string or keyword containing the note name (e.g. C, C#, Ab) and the octave (according to scientific pitch notation):
+
+  ```clojure
+  {:pitch "C4"  :duration 1000}
+  {:pitch "F#3" :duration 1000}
+  {:pitch :C2   :duration 1000}
+  {:pitch :Eb5  :duration 1000}
+  ```
 
 #### Duration
 

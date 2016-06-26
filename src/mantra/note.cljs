@@ -1,12 +1,13 @@
 (ns mantra.note
   (:require [mantra.osc           :as o]
             [mantra.note.duration :as nd]
+            [mantra.note.pitch    :as np]
             [chronoid.core        :as c]))
 
 (defn- play-note*
   [osc-model {:keys [pitch duration volume] :as note-model}]
   (let [{:keys [osc-node gain-node clock] :as osc-impl} (o/osc* osc-model)]
-    (o/freq osc-node (or pitch (:freq osc-model)))
+    (o/freq osc-node (np/parse-pitch (or pitch (:freq osc-model))))
     (o/gain-ramp gain-node (or volume (:gain osc-model) 1))
 
     (o/start-osc osc-impl)
