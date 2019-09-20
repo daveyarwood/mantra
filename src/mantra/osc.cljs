@@ -59,13 +59,15 @@
      :context   context
      :clock     clock}))
 
-(def ^{:doc "A set of currently active oscillators. Each oscillator is
-             represented as a map containing:
+(def
+  ^{:doc
+    "A set of currently active oscillators. Each oscillator is represented as a
+     map containing:
 
-             :osc-node  -- the oscillator node
-             :gain-node -- the gain node it's connected to
-             :model-id  -- the ID of the model that was used as a
-                           blueprint to create the oscillator"}
+     :osc-node  -- the oscillator node :gain-node -- the gain node it's
+     connected to :model-id  -- the ID of the model that was used as a blueprint
+     to create the oscillator"
+    :dynamic true}
   *oscillators* (atom #{}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
