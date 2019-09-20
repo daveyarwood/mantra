@@ -2,7 +2,7 @@
 
 <img src="https://github.com/daveyarwood/mantra/blob/master/img/faxanadu.gif?raw=true" alt="faxanadu screenshot" title="faxanadu: a game with mantras" align="right" />
 
-[![Clojars Project](http://clojars.org/mantra/latest-version.svg)](http://clojars.org/mantra)
+[![Clojars Project](https://img.shields.io/clojars/v/io.djy/mantra.svg)](http://clojars.org/io.djy/mantra)
 
 > Don't have negative thoughts. Remember your mantra.
 >

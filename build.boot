@@ -24,7 +24,7 @@
 (bootlaces! +version+)
 
 (task-options!
-  pom {:project 'mantra
+  pom {:project 'io.djy/mantra
        :version +version+
        :description "A ClojureScript library for making music with the Web Audio API"
        :url "https://github.com/daveyarwood/mantra"
