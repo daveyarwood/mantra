@@ -20,7 +20,7 @@
          '[adzerk.boot-cljs      :refer (cljs)]
          '[adzerk.boot-cljs-repl :refer (cljs-repl start-repl)])
 
-(def +version+ "0.6.0")
+(def +version+ "0.6.1")
 (bootlaces! +version+)
 
 (task-options!

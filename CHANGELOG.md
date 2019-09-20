@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.6.1 (2019-09-20)
+
+* First update in over 3 years! :tada:
+
+  I just made some internal improvements to [chronoid], which are included by
+  proxy in this release of mantra which depends on the new version of chronoid.
+
+  You can read about the improvements in chronoid
+  [here][chronoid-changelog-0.2.0], if you're curious.
+
+[chronoid-changelog-0.2.0]: https://github.com/daveyarwood/chronoid/blob/master/CHANGELOG.md#020-2019-09-20
+
 ## 0.6.0 (2016-06-26)
 
 * Added the ability to express the pitch of a note as a string or keyword containing the note (letter) name and octave.
