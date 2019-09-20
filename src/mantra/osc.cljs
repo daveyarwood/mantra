@@ -29,7 +29,7 @@
 
    Similarly, you can supply your own chronoid clock as :clock, otherwise
    Mantra will create one for you."
-  [& {:keys [type freq gain context clock] :as osc-map}]
+  [& {:keys [type context clock] :as osc-map}]
   (let [type    (name (or type :sine))
         context (or context @s/*audio-context* (s/create-audio-context))]
     (if-not (contains? #{"sine" "square" "sawtooth" "triangle"} type)
