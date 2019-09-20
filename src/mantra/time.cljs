@@ -4,8 +4,8 @@
 (def ^:dynamic *clock* (atom nil))
 
 (defn create-clock [context]
-  (reset! *clock* (-> (c/clock :context context)
-                      (c/start!))))
+  (reset! *clock* (doto (c/clock :context context)
+                    (c/start!))))
 
 (def ^:dynamic *tempo* (atom 60))
 
